@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: url('w.jpg') no-repeat center center/cover;
+            color: white;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            cursor: pointer;
+            background: #ff9800;
+            color: white;
+        }
+        #currentWeather {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="R.jpg" alt="Weather Logo">
+            <h1>Weather App 🌦</h1>
+        </div>
+    
+        <div id="currentWeather">
+            <p>Fetching your location...</p>
+        </div>
+
+        <input type="text" id="cityInput" placeholder="Enter city name">
+        <button onclick="searchWeather()">Search Weather</button>
+    </div>
+
+    <script>
+        // Function to get weather details for the user's current location
+        function getCurrentWeather(latitude, longitude) {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.current_weather) {
+                        document.getElementById("currentWeather").innerHTML = `
+                            <p><strong>Current Location Weather:</strong></p>
+                            <p>🌡 Temperature: ${data.current_weather.temperature}°C</p>
+                            <p>🌬 Wind Speed: ${data.current_weather.windspeed} km/h</p>
+                            <p>☁ Weather: ${data.current_weather.weathercode}</p>
+                        `;
+                    } else {
+                        document.getElementById("currentWeather").innerHTML = "<p>Could not fetch weather data.</p>";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching weather data:", error);
+                    document.getElementById("currentWeather").innerHTML = "<p>Could not fetch weather data.</p>";
+                });
+        }
+
+        // Function to handle successful location retrieval
+        function success(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            getCurrentWeather(latitude, longitude);
+        }
+
+        // Function to handle errors in retrieving location
+        function error() {
+            document.getElementById("currentWeather").innerHTML = "<p>Unable to retrieve location. Please enable GPS.</p>";
+        }
+
+        // Get user's location on page load
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(success, error);
+        } else {
+            document.getElementById("currentWeather").innerHTML = "<p>Geolocation is not supported by your browser.</p>";
+        }
+
+        // Function to search weather for a different city
+        function searchWeather() {
+            const city = document.getElementById("cityInput").value.trim();
+            if (city) {
+                window.open(`https://www.google.com/search?q=weather+${city}`, "_blank");
+            } else {
+                alert("Please enter a city name!");
+            }
+        }
+    </script>
+</body>
+</html>
